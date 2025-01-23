@@ -1,8 +1,8 @@
 /*
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-21 20:44:05
- * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-01-19 16:45:40
+ * @LastEditors: slighty-white 5273495@qq.com
+ * @LastEditTime: 2025-01-21 19:57:06
  * @FilePath: /USB-CANFD-Flock/src/CAN.cpp
  * @Description: 
  * 
@@ -144,6 +144,7 @@ void fileLock::unlock_r(){
  */
 usbCANFD::usbCANFD(ros::NodeHandle &n) : receiverRunning(true),
                                          threadPool(thread_nums),
+                                         stopReceiving(false),
                                          nh(n){
     pub = nh.advertise<nav_msgs::Odometry>("/wheel_odom", 10);
     initialize();
@@ -248,6 +249,7 @@ void usbCANFD::receiveCanMessages()
 {
     while (!stopReceiving) {  
         /* 接收 CAN 帧 */
+        
         canfd_frame frame;  
         lock.lock_r();
         int nbytes = read(sock, &frame, sizeof(frame));  
@@ -316,6 +318,7 @@ void usbCANFD::customReceive_1(const canfd_frame &frame)
     memcpy(&vy, &frame.data[12], 4);
     memcpy(&yaw, &frame.data[16], 4);
 
+    /* 发布里程计 */
     nav_msgs::Odometry odom_msg;
 
     odom_msg.header.stamp = ros::Time::now(); // 当前时间戳
@@ -340,6 +343,25 @@ void usbCANFD::customReceive_1(const canfd_frame &frame)
     odom_msg.twist.twist.angular.z = 0.0; 
 
     pub.publish(odom_msg);
+
+    /* 发布动态坐标转换 */
+    static tf2_ros::TransformBroadcaster broadcaster;
+    geometry_msgs::TransformStamped tfs;
+
+    tfs.header.frame_id = "odom";
+    tfs.header.stamp = ros::Time::now();
+    tfs.child_frame_id = "pcd_frame";
+
+    tfs.transform.translation.x = x;
+    tfs.transform.translation.y = y;
+    tfs.transform.translation.z = yaw;
+
+    tfs.transform.rotation.x = 0;
+    tfs.transform.rotation.y = 0;
+    tfs.transform.rotation.z = 0;
+    tfs.transform.rotation.w = 1.0;
+
+    broadcaster.sendTransform(tfs);
 }
 
 /**

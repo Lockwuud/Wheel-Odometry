@@ -1,11 +1,3 @@
-/*
- * @Author: hejia 2736463842@qq.com
- * @Date: 2025-01-19 16:32:24
- * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-01-19 16:33:11
- * @FilePath: /Wheel-Odometry/src/wheelOdom.cpp
- * @Description: 
- */
 #include "CAN.hpp"
 #include <ros/ros.h>
 
@@ -18,8 +10,7 @@ int main(int argc, char *argv[])
 
     /* 接收线程 */
     std::thread receiverThread(&usbCANFD::receiveCanMessages, &can);
-    while (true)
-    {
+    while(true){
         if (!can.receiverRunning)
         {
             std::cerr << "Receiver thread not running, restarting..." << std::endl;
@@ -32,3 +23,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
