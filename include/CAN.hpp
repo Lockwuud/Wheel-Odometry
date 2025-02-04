@@ -2,8 +2,8 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-22 01:17:56
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-01-19 22:20:30
- * @FilePath: /USB-CANFD-Flock/include/CAN.hpp
+ * @LastEditTime: 2025-02-04 11:38:02
+ * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/include/CAN.hpp
  * @Description:
  *
  * Copyright (c) 2024 by hejia 2736463842@qq.com, All Rights Reserved.
@@ -14,6 +14,7 @@
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <tf/transform_datatypes.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -39,9 +40,9 @@
 #include <iostream>           // 包含 I/O 相关功能
 
 // 连接系统命令echo "your_password" | sudo -S command_to_run
-#define ip_cmd_set_can0_params "echo 1 | sudo -S ip link set can0 type can bitrate 1000000 dbitrate 2000000 fd on"
-#define ip_cmd_can0_up "echo 1 | sudo -S ip link set can0 up"
-#define ip_cmd_can0_down "echo 1 | sudo -S ip link set can0 down"
+#define ip_cmd_set_can0_params "echo 6 | sudo -S ip link set can0 type can bitrate 1000000 dbitrate 2000000 fd on"
+#define ip_cmd_can0_up "echo 6 | sudo -S ip link set can0 up"
+#define ip_cmd_can0_down "echo 6 | sudo -S ip link set can0 down"
 
 // 异步接收线程池大小
 #define thread_nums 4
@@ -50,8 +51,10 @@
 #define interfaceName "can0"
 
 // CAN_ID
+#define send_id_lidar_odom 0x188
 #define receive_id_1 0x666
-#define receive_id_2 0x02
+#define receive_id_2 0x001
+#define receive_id_time 0x001
 
 class ThreadPool
 {
@@ -94,6 +97,7 @@ class usbCANFD
 private:
     ros::NodeHandle nh;
     ros::Publisher pub;
+    ros::Subscriber sub;
     int sock;                        // CAN 套接字
     std::atomic<bool> stopReceiving; // 接收线程池停止信号
     std::mutex parseMutex;           // 解包互斥锁
@@ -131,6 +135,10 @@ public:
 
     template <typename T>
     void sendData(uint32_t send_id, const std::vector<T> &data, int dlcparam);
+
+    void lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg);
+
+    void sendLidarOdom();
 };
 
 /**

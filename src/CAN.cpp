@@ -1,9 +1,9 @@
 /*
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-21 20:44:05
- * @LastEditors: slighty-white 5273495@qq.com
- * @LastEditTime: 2025-01-21 19:57:06
- * @FilePath: /USB-CANFD-Flock/src/CAN.cpp
+ * @LastEditors: hejia 2736463842@qq.com
+ * @LastEditTime: 2025-02-04 11:37:42
+ * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/src/CAN.cpp
  * @Description: 
  * 
  * Copyright (c) 2024 by hejia 2736463842@qq.com, All Rights Reserved. 
@@ -393,7 +393,7 @@ uint32_t usbCANFD::getTimeSyne()
         }
 
         /* 解析 CAN 消息 */
-        if (frame.can_id == 0x666)
+        if (frame.can_id == receive_id_time)
         {
             uint32_t time = -1;
             memcpy(&time, &frame.data[0], 4);
@@ -402,4 +402,69 @@ uint32_t usbCANFD::getTimeSyne()
         }
         else continue;
     }
+}
+
+/**
+ * @description: 雷达里程计回调
+ * @param {ConstPtr} &msg
+ * @return {*}
+ */
+void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
+{
+    float x, y, z;
+    double roll, pitch, yaw;
+    x = float(msg->pose.pose.position.x);
+    y = float(msg->pose.pose.position.y);
+    z = float(msg->pose.pose.position.z);
+    tf::Quaternion quat;                                     // 定义一个四元数
+    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat); // 取出方向存储于四元数
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+    yaw = float(yaw);
+
+    uint32_t time = getTimeSyne();
+
+    canfd_frame frame;
+    memset(&frame, 0, sizeof(frame));
+    frame.can_id = send_id_lidar_odom;
+    frame.len = 16;
+    frame.flags = 0x01;
+    memcpy(&frame.data[0], &x, 4);
+    memcpy(&frame.data[4], &y, 4);
+    memcpy(&frame.data[8], &yaw, 4);
+    memcpy(&frame.data[12], &time, 4);
+    
+    if (write(sock, &frame, sizeof(frame)) != sizeof(frame)) {
+        lock.unlock_w();
+        printf("Error while sending CAN message\n");
+        printf("Reconnecting......\n");
+        if (sock >= 0) {
+            close(sock);
+            sock = -1;
+        }
+        if(!initialize()){
+            printf("Reconnect failed, give up this sending!!!\n");
+            receiverRunning = false;
+            return;
+        }
+        else{
+            printf("Reconnect successfully!!!\n");
+            lock.lock_w();
+            if(write(sock, &frame, sizeof(frame)) != sizeof(frame)){
+                lock.unlock_w();
+                receiverRunning = false;
+                printf("Error while sending message after reconnection\n");
+                return;
+            }
+        }
+    }
+}
+
+/**
+ * @description: 将雷达里程计数据发送给码盘
+ * @return {*}
+ */
+void usbCANFD::sendLidarOdom()
+{
+    sub = nh.subscribe("/aft_mapped_to_init", 1, &usbCANFD::lidar_odom_cbk, this);
+    ros::spin();
 }

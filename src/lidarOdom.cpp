@@ -1,10 +1,10 @@
 /*
  * @Author: hejia 2736463842@qq.com
- * @Date: 2025-02-04 09:12:11
+ * @Date: 2025-02-04 10:40:04
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-04 11:40:44
- * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/src/wheelOdom.cpp
- * @Description: 码盘里程计发布及雷达里程计校准码盘
+ * @LastEditTime: 2025-02-04 10:41:16
+ * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/src/lidarOdom.cpp
+ * @Description: 将雷达里程计数据发送给码盘，用于码盘校准
  * Copyright (c) 2025 by hejia 2736463842@qq.com, All Rights Reserved. 
  */
 #include "CAN.hpp"
@@ -13,17 +13,12 @@
 int main(int argc, char *argv[])
 {
     /* ROS Initialize */
-    ros::init(argc, argv, "wheel_odom");
+    ros::init(argc, argv, "lidar_odom");
     ros::NodeHandle nh;
     usbCANFD can(nh);
 
-    /* 发送线程 */
-    std::thread sendThread(&usbCANFD::sendLidarOdom, &can);
-
     /* 接收线程 */
     std::thread receiverThread(&usbCANFD::receiveCanMessages, &can);
-
-    /* 维护线程 */
     while(true){
         if (!can.receiverRunning)
         {
