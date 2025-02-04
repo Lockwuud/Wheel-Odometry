@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
         }
     }
     receiverThread.join();
+    sendThread.join();
 
     return 0;
 }

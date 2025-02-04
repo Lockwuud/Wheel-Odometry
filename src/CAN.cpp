@@ -282,12 +282,12 @@ void usbCANFD::stopReceivingData() {
 void usbCANFD::parseCanMessage(const canfd_frame &frame) 
 {
     std::lock_guard<std::mutex> lock(parseMutex); 
-    std::cout << "Received CAN ID: " << frame.can_id << std::endl;  
-    std::cout << "Data: ";
-    for (int i = 0; i < frame.len; ++i) { 
-        std::cout << std::hex << (int)frame.data[i] << " "; 
-    }
-    std::cout << std::endl;
+    // std::cout << "Received CAN ID: " << frame.can_id << std::endl;  
+    // std::cout << "Data: ";
+    // for (int i = 0; i < frame.len; ++i) { 
+    //     std::cout << std::hex << (int)frame.data[i] << " "; 
+    // }
+    // std::cout << std::endl;
 
     switch (frame.can_id)
     {
@@ -411,6 +411,7 @@ uint32_t usbCANFD::getTimeSyne()
  */
 void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
 {
+    
     float x, y, z;
     double roll, pitch, yaw;
     x = float(msg->pose.pose.position.x);
