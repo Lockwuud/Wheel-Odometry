@@ -2,8 +2,8 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-21 20:44:05
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-04 11:37:42
- * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/src/CAN.cpp
+ * @LastEditTime: 2025-02-05 16:41:34
+ * @FilePath: /src/Wheel-Odometry/src/CAN.cpp
  * @Description: 
  * 
  * Copyright (c) 2024 by hejia 2736463842@qq.com, All Rights Reserved. 
@@ -147,6 +147,7 @@ usbCANFD::usbCANFD(ros::NodeHandle &n) : receiverRunning(true),
                                          stopReceiving(false),
                                          nh(n){
     pub = nh.advertise<nav_msgs::Odometry>("/wheel_odom", 10);
+    pub_goal = nh.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 10);
     initialize();
 }
 
@@ -375,6 +376,10 @@ void usbCANFD::customReceive_2(const canfd_frame &frame)
     memcpy(&x, &frame.data[0], 4);
     memcpy(&y, &frame.data[4], 4);
 
+    geometry_msgs::PoseStamped goal;
+    goal.pose.position.x = x;
+    goal.pose.position.y = y;
+    pub_goal.publish(goal);
 }
 
 /**

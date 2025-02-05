@@ -2,8 +2,8 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-22 01:17:56
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-04 11:38:02
- * @FilePath: /ego-planner-swarm/src/Wheel-Odometry/include/CAN.hpp
+ * @LastEditTime: 2025-02-05 15:58:09
+ * @FilePath: /src/Wheel-Odometry/include/CAN.hpp
  * @Description:
  *
  * Copyright (c) 2024 by hejia 2736463842@qq.com, All Rights Reserved.
@@ -98,8 +98,9 @@ class usbCANFD
 {
 private:
     ros::NodeHandle nh;
-    ros::Publisher pub;
-    ros::Subscriber sub;
+    ros::Publisher pub;              // 码盘里程计
+    ros::Subscriber sub;             // 雷达里程计
+    ros::Publisher pub_goal;         // 导航点
     int sock;                        // CAN 套接字
     std::atomic<bool> stopReceiving; // 接收线程池停止信号
     std::mutex parseMutex;           // 解包互斥锁
