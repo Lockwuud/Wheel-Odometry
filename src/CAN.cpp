@@ -370,7 +370,11 @@ void usbCANFD::customReceive_1(const canfd_frame &frame)
  */
 void usbCANFD::customReceive_2(const canfd_frame &frame)
 {
-    memcpy(&order, &frame.data[0], 1);
+    receiveData.clear();
+    float x, y;
+    memcpy(&x, &frame.data[0], 4);
+    memcpy(&y, &frame.data[4], 4);
+
 }
 
 /**

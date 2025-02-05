@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   quadrotor_msgs
   message_generation
+  move_base_msgs
 )
 
 ## Find OpenCV library
