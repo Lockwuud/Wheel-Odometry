@@ -283,12 +283,12 @@ void usbCANFD::stopReceivingData() {
 void usbCANFD::parseCanMessage(const canfd_frame &frame) 
 {
     std::lock_guard<std::mutex> lock(parseMutex); 
-    // std::cout << "Received CAN ID: " << frame.can_id << std::endl;  
-    // std::cout << "Data: ";
-    // for (int i = 0; i < frame.len; ++i) { 
-    //     std::cout << std::hex << (int)frame.data[i] << " "; 
-    // }
-    // std::cout << std::endl;
+    std::cout << "Received CAN ID: " << frame.can_id << std::endl;  
+    std::cout << "Data: ";
+    for (int i = 0; i < frame.len; ++i) { 
+        std::cout << std::hex << (int)frame.data[i] << " "; 
+    }
+    std::cout << std::endl;
 
     switch (frame.can_id)
     {
@@ -413,68 +413,68 @@ uint32_t usbCANFD::getTimeSyne()
     }
 }
 
-/**
- * @description: 雷达里程计回调
- * @param {ConstPtr} &msg
- * @return {*}
- */
-void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
-{
+// /**
+//  * @description: 雷达里程计回调
+//  * @param {ConstPtr} &msg
+//  * @return {*}
+//  */
+// void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
+// {
     
-    float x, y, z;
-    double roll, pitch, yaw;
-    x = float(msg->pose.pose.position.x);
-    y = float(msg->pose.pose.position.y);
-    z = float(msg->pose.pose.position.z);
-    tf::Quaternion quat;                                     // 定义一个四元数
-    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat); // 取出方向存储于四元数
-    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-    yaw = float(yaw);
+//     float x, y, z;
+//     double roll, pitch, yaw;
+//     x = float(msg->pose.pose.position.x);
+//     y = float(msg->pose.pose.position.y);
+//     z = float(msg->pose.pose.position.z);
+//     tf::Quaternion quat;                                     // 定义一个四元数
+//     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat); // 取出方向存储于四元数
+//     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+//     yaw = float(yaw);
 
-    uint32_t time = getTimeSyne();
+//     uint32_t time = getTimeSyne();
 
-    canfd_frame frame;
-    memset(&frame, 0, sizeof(frame));
-    frame.can_id = send_id_lidar_odom;
-    frame.len = 16;
-    frame.flags = 0x01;
-    memcpy(&frame.data[0], &x, 4);
-    memcpy(&frame.data[4], &y, 4);
-    memcpy(&frame.data[8], &yaw, 4);
-    memcpy(&frame.data[12], &time, 4);
+//     canfd_frame frame;
+//     memset(&frame, 0, sizeof(frame));
+//     frame.can_id = send_id_lidar_odom;
+//     frame.len = 16;
+//     frame.flags = 0x01;
+//     memcpy(&frame.data[0], &x, 4);
+//     memcpy(&frame.data[4], &y, 4);
+//     memcpy(&frame.data[8], &yaw, 4);
+//     memcpy(&frame.data[12], &time, 4);
     
-    if (write(sock, &frame, sizeof(frame)) != sizeof(frame)) {
-        lock.unlock_w();
-        printf("Error while sending CAN message\n");
-        printf("Reconnecting......\n");
-        if (sock >= 0) {
-            close(sock);
-            sock = -1;
-        }
-        if(!initialize()){
-            printf("Reconnect failed, give up this sending!!!\n");
-            receiverRunning = false;
-            return;
-        }
-        else{
-            printf("Reconnect successfully!!!\n");
-            lock.lock_w();
-            if(write(sock, &frame, sizeof(frame)) != sizeof(frame)){
-                lock.unlock_w();
-                receiverRunning = false;
-                printf("Error while sending message after reconnection\n");
-                return;
-            }
-        }
-    }
-}
+//     if (write(sock, &frame, sizeof(frame)) != sizeof(frame)) {
+//         lock.unlock_w();
+//         printf("Error while sending CAN message\n");
+//         printf("Reconnecting......\n");
+//         if (sock >= 0) {
+//             close(sock);
+//             sock = -1;
+//         }
+//         if(!initialize()){
+//             printf("Reconnect failed, give up this sending!!!\n");
+//             receiverRunning = false;
+//             return;
+//         }
+//         else{
+//             printf("Reconnect successfully!!!\n");
+//             lock.lock_w();
+//             if(write(sock, &frame, sizeof(frame)) != sizeof(frame)){
+//                 lock.unlock_w();
+//                 receiverRunning = false;
+//                 printf("Error while sending message after reconnection\n");
+//                 return;
+//             }
+//         }
+//     }
+// }
 
-/**
- * @description: 将雷达里程计数据发送给码盘
- * @return {*}
- */
-void usbCANFD::sendLidarOdom()
-{
-    sub = nh.subscribe("/aft_mapped_to_init", 1, &usbCANFD::lidar_odom_cbk, this);
-    ros::spin();
-}
+// /**
+//  * @description: 将雷达里程计数据发送给码盘
+//  * @return {*}
+//  */
+// void usbCANFD::sendLidarOdom()
+// {
+//     sub = nh.subscribe("/aft_mapped_to_init", 1, &usbCANFD::lidar_odom_cbk, this);
+//     ros::spin();
+// }

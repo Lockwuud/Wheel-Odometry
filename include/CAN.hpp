@@ -55,7 +55,7 @@
 // CAN_ID
 #define send_id_lidar_odom 0x188
 #define receive_id_1 0x666
-#define receive_id_2 0x001
+#define receive_id_2 0x61
 #define receive_id_time 0x168
 
 class ThreadPool
