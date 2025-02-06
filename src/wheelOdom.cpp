@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     usbCANFD can(nh);
 
     // /* 发送线程 */
-    // std::thread sendThread(&usbCANFD::sendLidarOdom, &can);
+    std::thread sendThread(&usbCANFD::sendLidarOdom, &can);
 
     /* 接收线程 */
     std::thread receiverThread(&usbCANFD::receiveCanMessages, &can);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         }
     }
     receiverThread.join();
-    // sendThread.join();
+    sendThread.join();
 
     return 0;
 }

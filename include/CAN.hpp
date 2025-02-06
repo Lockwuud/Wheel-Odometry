@@ -58,6 +58,10 @@
 #define receive_id_2 0x61
 #define receive_id_time 0x168
 
+// mid360偏置
+#define h_mid360 0.18426f
+#define w_mid360 0.20778f
+
 class ThreadPool
 {
 private:
