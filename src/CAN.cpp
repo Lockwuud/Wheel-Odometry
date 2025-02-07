@@ -2,7 +2,7 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-21 20:44:05
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-05 16:41:34
+ * @LastEditTime: 2025-02-07 14:37:30
  * @FilePath: /src/Wheel-Odometry/src/CAN.cpp
  * @Description: 
  * 
@@ -430,6 +430,9 @@ void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat); // 取出方向存储于四元数
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
     yaw = float(yaw);
+
+    x += h_mid360;
+    y -= w_mid360;
 
     x = x - h_mid360*cos(yaw) - w_mid360*sin(yaw);
     y = y - h_mid360*sin(yaw) + w_mid360*cos(yaw);
