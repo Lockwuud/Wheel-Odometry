@@ -431,11 +431,14 @@ void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
     yaw = float(yaw);
 
-    x += h_mid360;
-    y -= w_mid360;
+    float h = h_mid360 + h_offset;
+    float w = w_mid360 + w_offset;
 
-    x = x - h_mid360*cos(yaw) - w_mid360*sin(yaw);
-    y = y - h_mid360*sin(yaw) + w_mid360*cos(yaw);
+    x += h;
+    y -= w;
+
+    x = x - h*cos(yaw) - w*sin(yaw);
+    y = y - h*sin(yaw) + w*cos(yaw);
 
     uint32_t time = getTimeSyne();
 

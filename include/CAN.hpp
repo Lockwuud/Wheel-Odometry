@@ -2,7 +2,7 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-22 01:17:56
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-05 15:58:09
+ * @LastEditTime: 2025-02-07 20:46:05
  * @FilePath: /src/Wheel-Odometry/include/CAN.hpp
  * @Description:
  *
@@ -61,6 +61,10 @@
 // mid360偏置
 #define h_mid360 0.18426f
 #define w_mid360 0.20778f
+
+// 补偿偏置
+#define h_offset 0.0f
+#define w_offset 0.0f
 
 class ThreadPool
 {
