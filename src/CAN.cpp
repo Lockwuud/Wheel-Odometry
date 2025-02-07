@@ -2,7 +2,7 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-21 20:44:05
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-07 14:37:30
+ * @LastEditTime: 2025-02-08 00:33:34
  * @FilePath: /src/Wheel-Odometry/src/CAN.cpp
  * @Description: 
  * 
@@ -441,6 +441,39 @@ void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
     y = y - h*sin(yaw) + w*cos(yaw);
 
     uint32_t time = getTimeSyne();
+
+#if en_show_variance
+    if(data_x.size() == 10){
+        double sum_x = std::accumulate(std::begin(data_x), std::end(data_x), 0.0);
+        double mean_x =  sum_x / data_x.size();
+        double variance_x  = 0.0;
+        for (uint16_t i = 0 ; i < data_x.size() ; i++)
+        {
+            variance_x = variance_x + pow(data_x[i]-mean_x,2);
+        }
+        variance_x = variance_x/data_x.size();
+        double standard_deviation_x = sqrt(variance_x);
+        ROS_INFO("mean_x:%f、variance_x:%f、standard_deviation_x:%f", mean_x, variance_x, standard_deviation_x);
+
+        double sum_y = std::accumulate(std::begin(data_y), std::end(data_y), 0.0);
+        double mean_y =  sum_y / data_y.size();
+        double variance_y  = 0.0;
+        for (uint16_t i = 0 ; i < data_y.size() ; i++)
+        {
+            variance_y = variance_y + pow(data_y[i]-mean_y,2);
+        }
+        variance_y = variance_y/data_y.size();
+        double standard_deviation_y = sqrt(variance_y);
+        ROS_INFO("mean_y:%f、variance_y:%f、standard_deviation_y:%f", mean_y, variance_y, standard_deviation_y);
+
+        data_x.clear();
+        data_y.clear();
+    }
+    else{
+        data_x.push_back(x);
+        data_y.push_back(y);
+    }
+#endif 
 
     canfd_frame frame;
     memset(&frame, 0, sizeof(frame));

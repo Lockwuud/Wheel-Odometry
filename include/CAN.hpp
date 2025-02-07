@@ -2,7 +2,7 @@
  * @Author: hejia 2736463842@qq.com
  * @Date: 2024-12-22 01:17:56
  * @LastEditors: hejia 2736463842@qq.com
- * @LastEditTime: 2025-02-07 20:46:05
+ * @LastEditTime: 2025-02-08 00:30:04
  * @FilePath: /src/Wheel-Odometry/include/CAN.hpp
  * @Description:
  *
@@ -40,6 +40,10 @@
 #include <condition_variable> // 包含条件变量定义，用于线程同步
 #include <chrono>             // 包含时间相关定义，用于控制线程等待时间
 #include <iostream>           // 包含 I/O 相关功能
+#include <math.h>
+#include <numeric>
+
+#define en_show_variance true
 
 // 连接系统命令echo "your_password" | sudo -S command_to_run
 #define ip_cmd_set_can0_params "echo 6 | sudo -S ip link set can0 type can bitrate 1000000 dbitrate 2000000 fd on"
@@ -116,6 +120,8 @@ private:
     fileLock lock;                   // 文件锁
     ThreadPool threadPool;           // 异步接收线程池
     canfd_frame sendframe;           // 发送帧
+    std::vector<float> data_x;
+    std::vector<float> data_y;
 
     template <typename T>
     void handleData(const std::vector<T> &data);
