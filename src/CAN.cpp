@@ -379,6 +379,7 @@ void usbCANFD::customReceive_2(const canfd_frame &frame)
     geometry_msgs::PoseStamped goal;
     goal.pose.position.x = x;
     goal.pose.position.y = y;
+    goal.pose.position.z = 0;
     pub_goal.publish(goal);
 }
 
