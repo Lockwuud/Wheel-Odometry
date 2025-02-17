@@ -57,10 +57,10 @@
 #define interfaceName "can0"
 
 // CAN_ID
-#define send_id_lidar_odom 0x188
-#define receive_id_1 0x666
-#define receive_id_2 0x61
-#define receive_id_time 0x168
+#define send_id_lidar_odom 0x104
+#define receive_id_1 0x201
+#define receive_id_2 0x203
+#define receive_id_time 0x202
 
 // mid360偏置
 #define h_mid360 0.18426f
