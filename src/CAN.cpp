@@ -312,12 +312,13 @@ void usbCANFD::parseCanMessage(const canfd_frame &frame)
 void usbCANFD::customReceive_1(const canfd_frame &frame)
 {
     receiveData.clear();
-    float yaw, x, y, vx, vy;
+    float yaw, belta, x, y, vx, vy;
     memcpy(&x, &frame.data[0], 4);
     memcpy(&y, &frame.data[4], 4);
     memcpy(&vx, &frame.data[8], 4);
     memcpy(&vy, &frame.data[12], 4);
     memcpy(&yaw, &frame.data[16], 4);
+    memcpy(&belta, &frame.data[20], 4);
 
     /* 发布里程计 */
     nav_msgs::Odometry odom_msg;
@@ -341,7 +342,7 @@ void usbCANFD::customReceive_1(const canfd_frame &frame)
 
     odom_msg.twist.twist.angular.x = 0.0;
     odom_msg.twist.twist.angular.y = 0.0;
-    odom_msg.twist.twist.angular.z = 0.0; 
+    odom_msg.twist.twist.angular.z = belta; 
 
     pub.publish(odom_msg);
 
@@ -355,12 +356,16 @@ void usbCANFD::customReceive_1(const canfd_frame &frame)
 
     tfs.transform.translation.x = x;
     tfs.transform.translation.y = y;
-    tfs.transform.translation.z = yaw;
+    tfs.transform.translation.z = belta;
+
+    double yaw_rad = yaw * M_PI / 180.0;
+    double cy = cos(yaw_rad * 0.5);
+    double sy = sin(yaw_rad * 0.5);
 
     tfs.transform.rotation.x = 0;
     tfs.transform.rotation.y = 0;
-    tfs.transform.rotation.z = 0;
-    tfs.transform.rotation.w = 1.0;
+    tfs.transform.rotation.z = sy;
+    tfs.transform.rotation.w = cy;
 
     broadcaster.sendTransform(tfs);
 }
@@ -423,14 +428,14 @@ void usbCANFD::lidar_odom_cbk(const nav_msgs::Odometry::ConstPtr &msg)
 {
     
     float x, y, z;
-    double roll, pitch, yaw;
+    double roll, pitch, yaw_;
     x = float(msg->pose.pose.position.x);
     y = float(msg->pose.pose.position.y);
     z = float(msg->pose.pose.position.z);
     tf::Quaternion quat;                                     // 定义一个四元数
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat); // 取出方向存储于四元数
-    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-    yaw = float(yaw);
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw_);
+    float yaw = float(yaw_);
 
     float h = h_mid360 + h_offset;
     float w = w_mid360 + w_offset;
