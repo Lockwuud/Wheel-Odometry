@@ -238,7 +238,6 @@ void usbCANFD::sendCanMessage()
         }
     }
     lock.unlock_w();
-    // printf("Send successfully!!!\n");
 }
 
 /**
